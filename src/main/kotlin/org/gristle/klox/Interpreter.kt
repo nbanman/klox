@@ -142,6 +142,17 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
+    override fun visitSuperExpr(expr: Expr.Super): Any? {
+        val distance = locals[expr] ?: throw RuntimeError(expr.method, "'Super' not found.")
+        val superclass = environment.getAt(distance, "super") as LoxClass // unchecked cast!
+
+        val obj = environment.getAt(distance - 1, "this") as LoxInstance // again!!
+
+        val method = superclass.findMethod(expr.method.lexeme)
+
+        return method?.bind(obj) ?: throw RuntimeError(expr.method, "Method not found.")
+    }
+
     override fun visitThisExpr(expr: Expr.This): Any? {
         return lookupVariable(expr.keyword, expr)
     }
@@ -216,6 +227,11 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
 
         environment.define(stmt.name.lexeme, null)
 
+        if (superclass != null) {
+            environment = Environment(environment)
+            environment.define("super", superclass)
+        }
+
         val methods: MutableMap<String, LoxFunction> = HashMap()
         stmt.methods.forEach { method ->
             val isInitializer = method.name.lexeme == "init"
@@ -224,6 +240,12 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
 
         val klass = LoxClass(stmt.name.lexeme, superclass, methods)
+
+        if (superclass != null) {
+            // we know not null because we assigned the OG non-nullable environment to enclosing 
+            environment = environment.enclosing!!
+        }
+
         environment.assign(stmt.name, klass)
     }
 

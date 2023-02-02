@@ -6,7 +6,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     private enum class FunctionType { NONE, FUNCTION, INITIALIZER, METHOD }
 
-    private enum class ClassType { NONE, CLASS }
+    private enum class ClassType { NONE, CLASS, SUBCLASS }
 
     private val scopes: Deque<MutableMap<String, Boolean>> = java.util.ArrayDeque()
     private var currentFunction = FunctionType.NONE
@@ -95,6 +95,15 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         resolve(expr.obj)
     }
 
+    override fun visitSuperExpr(expr: Expr.Super) {
+        if (currentClass == ClassType.NONE) {
+            Lox.error(expr.keyword, "Can't use 'super' outside of a class.")
+        } else if (currentClass != ClassType.SUBCLASS) {
+            Lox.error(expr.keyword, "Can't use 'super' in a class with no superclass.")
+        }
+        resolveLocal(expr, expr.keyword)
+    }
+
     override fun visitThisExpr(expr: Expr.This) {
         if (currentClass == ClassType.NONE) {
             Lox.error(expr.keyword, "Can't use 'this' outside of a class.")
@@ -140,7 +149,11 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
             if (stmt.name.lexeme == stmt.superclass.name.lexeme) {
                 Lox.error(stmt.superclass.name, "A class can't inherit from itself.")
             }
+            currentClass = ClassType.SUBCLASS
             resolve(stmt.superclass)
+
+            beginScope()
+            scopes.peek()["super"] = true
         }
 
         beginScope()
@@ -156,6 +169,8 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
         }
 
         endScope()
+
+        if (stmt.superclass != null) endScope()
 
         currentClass = enclosingClass
     }
