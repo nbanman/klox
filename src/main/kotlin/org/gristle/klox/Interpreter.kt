@@ -3,7 +3,7 @@ package org.gristle.klox
 class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     class RuntimeError(val token: Token, message: String) : RuntimeException(message)
 
-    val globals = Environment().apply {
+    private val globals = Environment().apply {
         define("clock", object : LoxCallable {
             override fun call(interpreter: Interpreter, arguments: List<Any?>) =
                 (System.currentTimeMillis().toDouble()) / 1000.0
@@ -58,7 +58,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
     }
 
 
-    override fun visitBinaryExpr(expr: Expr.Binary): Any? {
+    override fun visitBinaryExpr(expr: Expr.Binary): Any {
         val left = evaluate(expr.left)
         val right = evaluate(expr.right)
 
@@ -107,7 +107,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
-    override fun visitGetExpr(expr: Expr.Get): Any? {
+    override fun visitGetExpr(expr: Expr.Get): Any {
         val obj = evaluate(expr.obj)
         return if (obj is LoxInstance) obj[expr.name] else {
             throw RuntimeError(expr.name, "Only instances have properties.")
@@ -142,7 +142,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         }
     }
 
-    override fun visitSuperExpr(expr: Expr.Super): Any? {
+    override fun visitSuperExpr(expr: Expr.Super): Any {
         val distance = locals[expr] ?: throw RuntimeError(expr.method, "'Super' not found.")
         val superclass = environment.getAt(distance, "super") as LoxClass // unchecked cast!
 
@@ -157,7 +157,7 @@ class Interpreter : Expr.Visitor<Any?>, Stmt.Visitor<Unit> {
         return lookupVariable(expr.keyword, expr)
     }
 
-    override fun visitUnaryExpr(expr: Expr.Unary): Any? {
+    override fun visitUnaryExpr(expr: Expr.Unary): Any {
         val right = evaluate(expr.right)
 
         return when (expr.operator.type) {

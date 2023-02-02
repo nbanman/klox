@@ -8,7 +8,7 @@ class LoxInstance(private val klass: LoxClass) {
         return "LoxInstance(${klass.name})"
     }
 
-    operator fun get(name: Token): Any? {
+    operator fun get(name: Token): Any {
         fields[name.lexeme]?.let { return it }
 
         val method = klass.findMethod(name.lexeme)

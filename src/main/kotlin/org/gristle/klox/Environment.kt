@@ -7,10 +7,10 @@ class Environment(val enclosing: Environment? = null) {
         values[name] = value
     }
 
-    fun ancestor(distance: Int): Environment? {
+    private fun ancestor(distance: Int): Environment? {
         var environment = this
         repeat(distance) {
-            environment = environment.enclosing ?: return null // todo make sure count is accurate 11.4.1
+            environment = environment.enclosing ?: return null
         }
         return environment
     }

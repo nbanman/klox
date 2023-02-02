@@ -6,8 +6,6 @@ class Parser(private val tokens: List<Token>) {
 
     private var current = 0
 
-    // todo deviation from Java impl. Not adding a null stmt, need to error catch somehow. All this 
-    // happens around 8.2.2
     fun parse(): List<Stmt> {
         val statements = mutableListOf<Stmt>()
         while (!isAtEnd()) {
@@ -153,7 +151,7 @@ class Parser(private val tokens: List<Token>) {
         val statements = mutableListOf<Stmt>()
 
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            declaration()?.let { statements.add(it) } // TODO check if this null-handling makes sense 8.5.2
+            declaration()?.let { statements.add(it) }
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")

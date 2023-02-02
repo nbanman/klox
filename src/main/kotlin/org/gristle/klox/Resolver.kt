@@ -8,7 +8,7 @@ class Resolver(private val interpreter: Interpreter) : Expr.Visitor<Unit>, Stmt.
 
     private enum class ClassType { NONE, CLASS, SUBCLASS }
 
-    private val scopes: Deque<MutableMap<String, Boolean>> = java.util.ArrayDeque()
+    private val scopes: Deque<MutableMap<String, Boolean>> = ArrayDeque()
     private var currentFunction = FunctionType.NONE
     private var currentClass = ClassType.NONE
 

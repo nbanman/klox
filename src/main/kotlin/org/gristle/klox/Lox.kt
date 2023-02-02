@@ -6,8 +6,8 @@ import java.io.InputStreamReader
 import kotlin.system.exitProcess
 
 object Lox {
-    var hadError = false
-    var hadRuntimeError = false
+    private var hadError = false
+    private var hadRuntimeError = false
 
     private val interpreter = Interpreter()
 
@@ -30,7 +30,7 @@ object Lox {
         if (hadRuntimeError) exitProcess(70)
     }
 
-    fun runLox(source: String) {
+    private fun runLox(source: String) {
         val scanner = Scanner(source)
         val tokens = scanner.scanTokens()
 
@@ -63,7 +63,7 @@ object Lox {
         hadRuntimeError = true
     }
 
-    fun report(line: Int, where: String, message: String) {
+    private fun report(line: Int, where: String, message: String) {
         System.err.println("[line $line] Error$where: $message")
         hadError = true
     }

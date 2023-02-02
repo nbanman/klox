@@ -1,9 +1,9 @@
 package org.gristle.klox
 
-class LoxClass(val name: String, val superclass: LoxClass?, private val methods: Map<String, LoxFunction>) :
+class LoxClass(val name: String, private val superclass: LoxClass?, private val methods: Map<String, LoxFunction>) :
     LoxCallable {
 
-    override fun call(interpreter: Interpreter, arguments: List<Any?>): Any? {
+    override fun call(interpreter: Interpreter, arguments: List<Any?>): Any {
         val instance = LoxInstance(this)
         val initializer = findMethod("init")
         initializer?.bind(instance)?.call(interpreter, arguments)
